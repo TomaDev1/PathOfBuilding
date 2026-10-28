@@ -55,6 +55,46 @@ local function countExplicits(item)
 	return lines, false
 end
 
+-- Is this unique (or its chosen version/variant) no longer obtainable? Uses PoB's own markers:
+-- "Source: No longer obtainable" / Race Events uniques in the unique database, and "Pre x.y"
+-- versions and variants, which describe how the item used to roll.
+local function legacyReason(item)
+	local title = (item.title or ""):gsub("^[Ff]oulborn ", "")
+	local dbItem = main and main.uniqueDB and main.uniqueDB.byTitle and main.uniqueDB.byTitle[title:lower()]
+	local source = item.source or (dbItem and dbItem.source)
+	local league = item.league or (dbItem and dbItem.league)
+	if source == "No longer obtainable" or league == "Race Events" then
+		return "Legacy unique: no longer obtainable"
+	end
+	if item.versionList and item.selectedVersion then
+		local version = item.versionList[item.selectedVersion]
+		if type(version) == "string" and version:match("^Pre ") then
+			return "Legacy version ("..version.."): can no longer be obtained"
+		end
+	end
+	if item.variantList then
+		local chosen = { }
+		if item.usesVariantGroups and item.variantGroupSelections then
+			for _, variantId in pairs(item.variantGroupSelections) do
+				t_insert(chosen, variantId)
+			end
+		else
+			t_insert(chosen, item.variant)
+			for i, suffix in ipairs({ "", "2", "3", "4", "5" }) do
+				if item["hasAltVariant"..suffix] and item["variantAlt"..suffix] then
+					t_insert(chosen, item["variantAlt"..suffix])
+				end
+			end
+		end
+		for _, variantId in ipairs(chosen) do
+			local name = item.variantList[variantId]
+			if type(name) == "string" and name:match("^Pre ") then
+				return "Legacy variant ("..name.."): can no longer be obtained"
+			end
+		end
+	end
+end
+
 function M.Check(build, params)
 	params = params or { }
 	local chase = { }
@@ -108,6 +148,10 @@ function M.Check(build, params)
 				if chase[title:lower()] then
 					add(violations, slotName, name, "Chase unique; keep it out of SSF baselines (use an upgrade loadout)")
 				end
+				local legacy = legacyReason(item)
+				if legacy then
+					add(violations, slotName, name, legacy)
+				end
 				if item.foulborn or (item.title or ""):match("^[Ff]oulborn") then
 					add(notes, slotName, name, "Foulborn (mutated) unique; acceptable when needed but call it out")
 				end
@@ -153,6 +197,9 @@ function M.Check(build, params)
 				if gem.enabled and gemData then
 					local subject = gemData.name
 					local where = "Skill group #"..groupIndex
+					if gemData.grantedEffect and gemData.grantedEffect.legacy then
+						add(violations, where, subject, "Legacy gem: can no longer be obtained")
+					end
 					if gemData.name == "Archmage" or gemData.name == "Archmage Support" then
 						add(violations, where, subject, "Archmage Support is not allowed")
 					end

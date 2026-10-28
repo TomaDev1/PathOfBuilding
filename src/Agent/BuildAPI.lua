@@ -2287,7 +2287,7 @@ tool{
 
 tool{
 	name = "check_ssf_rules",
-	description = "Check equipped items and gems against SSF crafting rules: at most 2 influences per item, eldritch implicits only on helmet/body/gloves/boots and never with base influences, no Archmage Support, awakened gems max level 5, jewel mod limits, and chase uniques that shouldn't be in an SSF baseline. Awakened/exceptional gems and foulborn uniques are flagged as notes.",
+	description = "Check equipped items and gems against SSF crafting rules: no legacy items (no longer obtainable uniques, 'Pre x.y' versions/variants, legacy gems), at most 2 influences per item, eldritch implicits only on helmet/body/gloves/boots and never with base influences, no Archmage Support, awakened gems max level 5, jewel mod limits, and chase uniques that shouldn't be in an SSF baseline. Awakened/exceptional gems and foulborn uniques are flagged as notes.",
 	inputSchema = obj({
 		chase_uniques = S.arr({ type = "string" }, "Extra unique names to treat as chase items"),
 		allowed_uniques = S.arr({ type = "string" }, "Unique names to allow even if on the default chase list"),

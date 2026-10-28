@@ -29,7 +29,7 @@ call after that is fast.
 | `rank_gems` | Score every support gem (or a list) in one socket at once |
 | `compare_items` | Score many candidate items against what is equipped |
 | `ablation` | Remove one gem, item, keystone, notable or mastery at a time and measure the loss |
-| `check_ssf_rules` | Check items and gems against SSF crafting rules (influences, eldritch implicits, chase uniques, Archmage, awakened levels, jewel mods) |
+| `check_ssf_rules` | Check items and gems against SSF crafting rules (no legacy items or gems, influences, eldritch implicits, chase uniques, Archmage, awakened levels, jewel mods) |
 
 Every tool that changes the build returns what changed (DPS, EHP, max hits, resistances, ...) so Claude
 sees the effect of each step without asking again.

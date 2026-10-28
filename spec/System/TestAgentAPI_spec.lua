@@ -205,6 +205,45 @@ describe("TestAgentAPI", function()
 		assert.are.equals(#res.violations - 1, #allowed.violations)
 	end)
 
+	it("rejects legacy items and gems", function()
+		call("new_build", { class = "Marauder", level = 90 })
+		local function violationsFor(slot)
+			local found = { }
+			for _, v in ipairs(SSFRules.Check(build, { }).violations) do
+				if v.slot == slot then
+					table.insert(found, v.message)
+				end
+			end
+			return table.concat(found, "\n")
+		end
+
+		-- Unique that is no longer obtainable at all
+		call("equip_item", { item = "Rarity: Unique\nNgamahu Tiki\nCoral Amulet" })
+		assert.is_truthy(violationsFor("Amulet"):find("no longer obtainable", 1, true))
+
+		-- Old version of a unique that still drops in its current form
+		call("equip_item", { item = "Rarity: Unique\nArn's Anguish\nCloth Belt\nVariant: Pre 3.17.0\nVariant: Current\nSelected Variant: 1\n+(600-700) to Armour" })
+		assert.is_truthy(violationsFor("Belt"):find("Legacy variant (Pre 3.17.0)", 1, true))
+		call("equip_item", { item = "Rarity: Unique\nArn's Anguish\nCloth Belt\nVariant: Pre 3.17.0\nVariant: Current\nSelected Variant: 2\n+(600-700) to Armour" })
+		assert.are.equals("", violationsFor("Belt"))
+
+		-- Legacy gems
+		local legacyGem
+		for _, gemData in pairs(build.data.gems) do
+			if gemData.grantedEffect.legacy then
+				legacyGem = gemData
+				break
+			end
+		end
+		assert.is_not_nil(legacyGem)
+		local group = { label = "", enabled = true, mainActiveSkill = 1, gemList = {
+			{ gemId = legacyGem.id, nameSpec = legacyGem.name, level = 20, quality = 0, enabled = true, enableGlobal1 = true, enableGlobal2 = true, count = 1 },
+		} }
+		build.skillsTab:ProcessSocketGroup(group)
+		table.insert(build.skillsTab.socketGroupList, group)
+		assert.is_truthy(violationsFor("Skill group #1"):find("Legacy gem", 1, true))
+	end)
+
 	it("serves tools over MCP", function()
 		local out = { buf = { } }
 		function out:write(...)
