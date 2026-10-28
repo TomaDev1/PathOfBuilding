@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "path-of-building": {
+      "command": "luajit",
+      "args": ["src/PoBMCP.lua"]
+    }
+  }
+}
