@@ -37,6 +37,7 @@ local allyLifePoolList = {
 	{ key = "totems", life = "TotalTotemLife", mitigation = "TotemAllyDamageMitigation", redirect = "takenFromTotemsBeforeYou", label = "Nearest Totem Life" },
 	{ key = "vaalRejuvenationTotems", life = "TotalVaalRejuvenationTotemLife", mitigation = "VaalRejuvenationTotemAllyDamageMitigation", redirect = "takenFromVaalRejuvenationTotemsBeforeYou", label = "Total Vaal Rejuvenation Totem Life" },
 	{ key = "voidSpawn", life = "TotalVoidSpawnLife", mitigation = "VoidSpawnAllyDamageMitigation", redirect = "takenFromVoidSpawnBeforeYou", label = "Total Void Spawn Life" },
+	{ key = "mercenary", life = "TotalMercenaryLife", mitigation = "MercenaryAllyDamageMitigation", redirect = "takenFromMercenaryBeforeYou", needsMoreLifeThanYou = true, label = "Mercenary Life" },
 	{ key = "stoneGolem", life = "TotalStoneGolemLife", mitigation = "StoneGolemAllyDamageMitigation", redirect = "takenFromStoneGolemBeforeYou", meleeOnly = true, label = "Total Stone Golem Life" },
 	{ key = "soulLink", life = "AlliedEnergyShield", mitigation = "SoulLinkMitigation", label = "Total Allied Energy shield" },
 	{ key = "frostShield", life = "FrostShieldLife", mitigation = "FrostShieldDamageMitigation", label = "Frost Shield Life" },
@@ -2513,6 +2514,11 @@ function calcs.buildDefenceEstimations(env, actor)
 						life = modDB:Sum("BASE", nil, ally.fallback)
 					end
 					output[ally.life] = modDB:Override(nil, ally.life) or life
+					-- Loyal Bodyguard only shares damage while the Mercenary has more Life than you
+					if ally.needsMoreLifeThanYou and (output[ally.life] or 0) <= (output.Life or 0) then
+						output[ally.mitigation] = 0
+						output[ally.life] = nil
+					end
 				end
 			end
 		end

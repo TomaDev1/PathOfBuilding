@@ -2298,6 +2298,258 @@ tool{
 	end,
 }
 
+-----------------------------------------------------------------------------
+-- Mercenaries (Luminary)
+-----------------------------------------------------------------------------
+-- PoB has no Mercenary actor, so a Mercenary is modelled as its own build. Buffs travel between
+-- the two builds through the Party tab, the same way a support character's buffs do.
+
+local partyFields = {
+	{ export = "PlayerMods", control = "editPartyMemberStats" },
+	{ export = "Aura", control = "editAuras" },
+	{ export = "Curse", control = "editCurses" },
+	{ export = "Warcry", control = "editWarcries" },
+	{ export = "Link", control = "editLinks" },
+	{ export = "EnemyConditions", control = "enemyCond" },
+	{ export = "EnemyMods", control = "enemyMods" },
+}
+
+-- What the loaded build would hand to party members (Import/Export tab > Export Support)
+local function exportPartyBuffs(skip)
+	local partyTab = build.partyTab
+	local wasEnabled = partyTab.enableExportBuffs
+	partyTab.enableExportBuffs = true
+	recalc()
+	local exports = { }
+	for _, field in ipairs(partyFields) do
+		if not (skip and skip[field.export]) then
+			exports[field.export] = partyTab:exportBuffs(field.export)
+		end
+	end
+	partyTab.enableExportBuffs = wasEnabled
+	return exports
+end
+
+-- Replace the loaded build's Party tab with another build's exports
+local function importPartyBuffs(exports)
+	local partyTab = build.partyTab
+	for _, field in ipairs(partyFields) do
+		partyTab.controls[field.control]:SetText(exports[field.export] or "")
+	end
+	partyTab.controls.rebuild.onClick()
+end
+
+local function partyBuffNames(exports)
+	local names = { }
+	for _, field in ipairs({ "Aura", "Curse", "Warcry", "Link" }) do
+		local text = exports[field] or ""
+		local list = { }
+		-- Each buff is a name line, then its effect and mods, closed by "---"
+		local expectName = true
+		for line in (text.."\n"):gmatch("([^\n]*)\n") do
+			if line == "---" then
+				expectName = true
+			elseif expectName and line ~= "" and not line:match("^%-%-%-") and not line:match("^[%d%.]+$") then
+				if line ~= "otherEffects" and line ~= "extraAura" then
+					t_insert(list, line)
+				end
+				expectName = false
+			end
+		end
+		if #list > 0 then
+			names[field] = list
+		end
+	end
+	return names
+end
+
+local uniqueSlotCategory = {
+	["Helmet"] = "helmets", ["Gloves"] = "gloves", ["Boots"] = "boots", ["Belt"] = "belts", ["Amulet"] = "amulets",
+	["Ring 1"] = "rings", ["Ring 2"] = "rings", ["Ring 3"] = "rings",
+	["Weapon 1"] = "weapons", ["Weapon 2"] = "weapons",
+}
+
+-- Read the player's allocated Luminary passives
+local function luminaryInfo()
+	local info = { nodes = { }, uniqueSlots = { }, mods = { }, perUniqueMore = 0, recoup = 0, auraEffect = 0 }
+	for _, node in pairs(build.spec.allocNodes) do
+		if node.ascendancyName == "Luminary" and node.sd then
+			t_insert(info.nodes, node.dn)
+			local text = lower(t_concat(node.sd, " "))
+			for categories in text:gmatch("your mercenary can equip unique ([%a, ]+)") do
+				for category in categories:gmatch("%a+") do
+					if category == "weapons" or category == "shields" or category == "quivers" then
+						info.uniqueSlots.weapons = true
+					elseif category ~= "and" then
+						info.uniqueSlots[category] = true
+					end
+				end
+			end
+			local num = text:match("your mercenary and their minions deal (%d+)%% increased damage")
+			if num then
+				t_insert(info.mods, num.."% increased Damage")
+				t_insert(info.mods, "Minions deal "..num.."% increased Damage")
+			end
+			num = text:match("your mercenary and their minions have (%d+)%% increased maximum life")
+			if num then
+				t_insert(info.mods, num.."% increased maximum Life")
+				t_insert(info.mods, "Minions have "..num.."% increased maximum Life")
+			end
+			num = text:match("deal (%d+)%% more damage for each unique item they have equipped")
+			if num then
+				info.perUniqueMore = info.perUniqueMore + tonumber(num)
+			end
+			num = text:match("your mercenary has (%d+)%% increased effect of non%-curse auras from skills")
+			if num then
+				info.auraEffect = info.auraEffect + tonumber(num)
+			end
+			num = text:match("life is lower than your own, (%d+)%% of damage they take is recouped as life")
+			if num then
+				info.recoup = info.recoup + tonumber(num)
+			end
+		end
+	end
+	t_sort(info.nodes)
+	return info
+end
+
+-- Unique items the Mercenary has equipped, and any its Luminary can't let it wear
+local function mercUniques(info)
+	local count, warnings = 0, { }
+	for slotName, slot in pairs(build.itemsTab.slots) do
+		local item = slot.selItemId and slot.selItemId ~= 0 and build.itemsTab.items[slot.selItemId]
+		if item and not slot.nodeId and not slotName:match("Flask") and not slotName:match("Abyssal")
+			and (item.rarity == "UNIQUE" or item.rarity == "RELIC") then
+			count = count + 1
+			local category = uniqueSlotCategory[slotName]
+			if slotName == "Body Armour" then
+				t_insert(warnings, item.name.." ("..slotName.."): Mercenaries can never equip unique Body Armours")
+			elseif not category or not info.uniqueSlots[category] then
+				t_insert(warnings, item.name.." ("..slotName.."): needs the Legendary "..(category and (category:gsub("^%l", string.upper)) or "Arms").." Luminary passive")
+			end
+		end
+	end
+	t_sort(warnings)
+	return count, warnings
+end
+
+local function readFile(path)
+	local f, err = io.open(path, "rb")
+	if not f then
+		error("Could not open '"..path.."': "..tostring(err))
+	end
+	local text = f:read("*a")
+	f:close()
+	return text
+end
+
+tool{
+	name = "merc_sync",
+	description = "Luminary/Mercenary testing. The loaded build is the player; merc is a PoB build of the Mercenary (templates for all 36 types: one per class, level 83, gems at 26, base stats as custom mods). Exports the player's auras, Link buffs (with Golden Glory's Light Radius scaling), curses, warcries and enemy debuffs into the Mercenary's Party tab, adds the Mercenary-side Luminary passives (increased damage/life, more damage per equipped unique, aura effect, recoup) as a custom modifier block, and reports the Mercenary's stats and any uniques it can't wear. With direction 'both' (default) the Mercenary's own auras and debuffs are also imported into the player's Party tab, and its Life is set for Loyal Bodyguard. The player stays loaded afterwards unless keep_merc_loaded is set.",
+	inputSchema = obj({
+		merc = S.str("Path to the Mercenary's .xml build"),
+		direction = { type = "string", enum = { "to_merc", "both" }, description = "to_merc: only buff the Mercenary. both (default): also give the player the Mercenary's auras and debuffs" },
+		save_merc_to = S.str("Write the synced Mercenary build to this .xml file"),
+		keep_merc_loaded = S.bool("Leave the Mercenary build loaded (e.g. to equip its gear), instead of returning to the player"),
+	}, { "merc" }),
+	handler = function(p)
+		requireBuild()
+		local direction = p.direction or "both"
+		local mercXml = readFile(p.merc)
+		local mercName = p.merc:match("([^/\\]+)%.xml$") or "Mercenary"
+		local playerSnap = snapshot()
+		local playerSource = API.sourcePath
+		local playerBefore = currentHeadline()
+		local info = luminaryInfo()
+		local res = { luminary = { nodes = info.nodes } }
+
+		local function mercPass(playerExports, playerLife)
+			loadXML(mercXml, mercName)
+			frame()
+			importPartyBuffs(playerExports)
+			local uniqueCount, warnings = mercUniques(info)
+			local mods = { }
+			for _, line in ipairs(info.mods) do
+				t_insert(mods, line)
+			end
+			if info.perUniqueMore > 0 and uniqueCount > 0 then
+				t_insert(mods, (info.perUniqueMore * uniqueCount).."% more Damage")
+				t_insert(mods, "Minions deal "..(info.perUniqueMore * uniqueCount).."% more Damage")
+			end
+			if info.auraEffect > 0 then
+				t_insert(mods, info.auraEffect.."% increased effect of Non-Curse Auras from your Skills")
+			end
+			recalc()
+			if info.recoup > 0 and (build.calcsTab.mainOutput.Life or 0) < (playerLife or 0) then
+				t_insert(mods, info.recoup.."% of Damage taken Recouped as Life")
+			end
+			local custom = Changes.custom_mods({ title = "Luminary (from player)", mods = mods })
+			recalc()
+			return {
+				uniquesEquipped = uniqueCount,
+				warnings = #warnings > 0 and warnings or nil,
+				luminaryMods = mods,
+				unsupportedMods = #custom.unsupported > 0 and custom.unsupported or nil,
+				buffsFromPlayer = partyBuffNames(playerExports),
+			}
+		end
+
+		local ok, err = pcall(function()
+			local playerExports = exportPartyBuffs()
+			local playerLife = build.calcsTab.mainOutput.Life
+			local merc = mercPass(playerExports, playerLife)
+			if direction == "both" then
+				-- The Mercenary has no Link skills to give, and its stats would only confuse the player's Party tab
+				local mercExports = exportPartyBuffs({ Link = true, PlayerMods = true })
+				local mercLife = build.calcsTab.mainOutput.Life
+				loadXML(playerSnap.xml, playerSnap.name)
+				frame()
+				importPartyBuffs(mercExports)
+				build.configTab.input.mercenaryLife = mercLife and m_floor(mercLife) or nil
+				build.configTab:BuildModList()
+				recalc()
+				local playerAfter = currentHeadline()
+				res.player = {
+					before = compactHeadline(playerBefore),
+					after = compactHeadline(playerAfter),
+					changes = diffHeadline(playerBefore, playerAfter),
+					buffsFromMerc = partyBuffNames(mercExports),
+				}
+				playerSnap = snapshot()
+				-- Buffs from the Mercenary can raise the player's Life and so their Links; resync the Mercenary once
+				playerExports = exportPartyBuffs()
+				playerLife = build.calcsTab.mainOutput.Life
+				merc = mercPass(playerExports, playerLife)
+			end
+			merc.stats = currentHeadline()
+			res.merc = merc
+			if p.save_merc_to then
+				local xml = build:SaveDB(p.save_merc_to)
+				local f, ferr = io.open(p.save_merc_to, "wb")
+				if not f then
+					error("Could not write '"..p.save_merc_to.."': "..tostring(ferr))
+				end
+				f:write(xml)
+				f:close()
+				res.merc.savedTo = p.save_merc_to
+			end
+		end)
+		if p.keep_merc_loaded and ok then
+			API.sourcePath = p.save_merc_to or p.merc
+			res.loaded = "merc"
+		else
+			restore(playerSnap)
+			API.sourcePath = playerSource
+			build.modFlag = true
+			res.loaded = "player"
+		end
+		if not ok then
+			error(err, 0)
+		end
+		return res
+	end,
+}
+
 API.tools = tools
 API.toolOrder = toolOrder
 

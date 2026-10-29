@@ -30,6 +30,7 @@ call after that is fast.
 | `compare_items` | Score many candidate items against what is equipped |
 | `ablation` | Remove one gem, item, keystone, notable or mastery at a time and measure the loss |
 | `check_ssf_rules` | Check items and gems against SSF crafting rules (no legacy items or gems, influences, eldritch implicits, chase uniques, Archmage, awakened levels, jewel mods) |
+| `merc_sync` | Luminary: push the player's auras, Link buffs, curses and Luminary passives into a Mercenary build and report its stats; optionally bring the Mercenary's auras back to the player |
 
 Every tool that changes the build returns what changed (DPS, EHP, max hits, resistances, ...) so Claude
 sees the effect of each step without asking again.
@@ -108,6 +109,28 @@ Loading a build reads it; to keep Claude's edits, save to a new file in your Bui
   next upgrade; `what_if` with `custom_mods` prices hypothetical stats ("what is +1% max fire res worth?").
 - Use loadouts for progression tiers (league start, early maps, endgame, chase) and `compare_loadouts`
   to verify the whole file.
+
+### Mercenaries (Luminary)
+
+PoB has no Mercenary actor, so a Mercenary is its own build, the way the community does it by hand
+(player exports as a support, the Mercenary imports it on the Party tab).
+
+1. Start from a template for the Mercenary's class: a level 83 Scion with the Mercenary's skill gems at
+   level 26 and its base stats as a custom modifier block. The Notes hold per-skill fixes (no reservation,
+   extra projectiles, cooldowns, more damage); paste the ones for skills it actually has into a custom block.
+2. Set its level, gear, supports (match the merc's tooltip numbers) and main skill, and save it.
+3. Load the player and call `merc_sync` with the Mercenary's file. It exports the player's buffs into the
+   Mercenary's Party tab and writes a "Luminary (from player)" custom block from the player's Luminary
+   passives: increased damage and life, 8% more damage per unique the Mercenary wears, Bestowed Knighthood's
+   aura effect, and Loyal Bodyguard's recoup when the Mercenary has less Life than the player. It warns about
+   uniques the Mercenary can't wear (no Legendary passive for that slot, or a unique body armour).
+4. With `direction: "both"` the player also gets the Mercenary's auras, curses and enemy debuffs, and the
+   Mercenary's Life goes into the "Mercenary maximum Life" config for Loyal Bodyguard. The Mercenary is then
+   synced again, since its auras can raise the player's Life and so Flame Link.
+
+Golden Glory (Light Radius applies to Link buff effect) and Loyal Bodyguard (20% of hit damage taken from
+the Mercenary's Life while it has more Life than you) are calculated natively, so the player's own PoB
+numbers are right too.
 
 When game knowledge is missing, look it up instead of guessing:
 [poewiki.net](https://www.poewiki.net) for mechanics,

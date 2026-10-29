@@ -17007,11 +17007,10 @@ c["If you've Consumed a corpse Recently, you and your Minions have 30% increased
 c["If you've Impaled an Enemy Recently, you"]={nil,"If you've Impaled an Enemy Recently, you "}
 c["If you've Impaled an Enemy Recently, you and nearby Allies have +1000 to Armour"]={{[1]={[1]={type="Condition",var="ImpaledRecently"},flags=0,keywordFlags=0,name="ExtraAura",type="LIST",value={mod={flags=0,keywordFlags=0,name="Armour",type="BASE",value=1000}}}},nil}
 c["If you've Warcried Recently, you and nearby allies have 20% increased Attack, Cast and Movement Speed"]={{[1]={[1]={type="Condition",var="UsedWarcryRecently"},flags=0,keywordFlags=0,name="ExtraAura",type="LIST",value={mod={flags=0,keywordFlags=0,name="Speed",type="INC",value=20}}},[2]={[1]={type="Condition",var="UsedWarcryRecently"},flags=0,keywordFlags=0,name="ExtraAura",type="LIST",value={mod={flags=0,keywordFlags=0,name="MovementSpeed",type="INC",value=20}}}},nil}
-c["If your Linked Mercenary dies, the Link owner does not also die"]={nil,"If your Linked Mercenary dies, the Link owner does not also die "}
+c["If your Linked Mercenary dies, the Link owner does not also die"]={{},nil}
 c["If your Mercenary's Life is higher than your own, 20% of Damage from Hits is"]={nil,"If your Mercenary's Life is higher than your own, 20% of Damage from Hits is "}
-c["If your Mercenary's Life is higher than your own, 20% of Damage from Hits is taken from your Mercenary's Life before you"]={nil,"If your Mercenary's Life is higher than your own, 20% of Damage from Hits is taken from your Mercenary's Life before you "}
-c["If your Mercenary's Life is higher than your own, 20% of Damage from Hits is taken from your Mercenary's Life before you If your Mercenary's Life is lower than your own, 40% of Damage they take is Recouped as Life"]={nil,"If your Mercenary's Life is higher than your own, 20% of Damage from Hits is taken from your Mercenary's Life before you If your Mercenary's Life is lower than your own, 40% of Damage they take is Recouped as Life "}
-c["If your Mercenary's Life is lower than your own, 40% of Damage they take is Recouped as Life"]={nil,"If your Mercenary's Life is lower than your own, 40% of Damage they take is Recouped as Life "}
+c["If your Mercenary's Life is higher than your own, 20% of Damage from Hits is taken from your Mercenary's Life before you"]={{[1]={flags=0,keywordFlags=0,name="takenFromMercenaryBeforeYou",type="BASE",value=20}},nil}
+c["If your Mercenary's Life is lower than your own, 40% of Damage they take is Recouped as Life"]={{},nil}
 c["Ignited Enemies Burn 50% slower"]={{[1]={flags=0,keywordFlags=0,name="IgniteBurnSlower",type="INC",value=50}},nil}
 c["Ignited Enemies Burn 58% slower"]={{[1]={flags=0,keywordFlags=0,name="IgniteBurnSlower",type="INC",value=58}},nil}
 c["Ignited Enemies Burn 65% slower"]={{[1]={flags=0,keywordFlags=0,name="IgniteBurnSlower",type="INC",value=65}},nil}
@@ -17134,7 +17133,7 @@ c["Increases and Reductions to Light Radius also apply to Accuracy"]={{[1]={flag
 c["Increases and Reductions to Light Radius also apply to Area of Effect at 50% of their value"]={{[1]={flags=0,keywordFlags=0,name="LightRadiusAppliesToAreaOfEffect",type="FLAG",value=true}},nil}
 c["Increases and Reductions to Light Radius also apply to Damage"]={{[1]={flags=0,keywordFlags=0,name="LightRadiusAppliesToDamage",type="FLAG",value=true}},nil}
 c["Increases and Reductions to Light Radius also apply to Effect"]={nil,"Increases and Reductions to Light Radius also apply to Effect "}
-c["Increases and Reductions to Light Radius also apply to Effect of your Link Skill Buffs on your Mercenary"]={nil,"Increases and Reductions to Light Radius also apply to Effect of your Link Skill Buffs on your Mercenary "}
+c["Increases and Reductions to Light Radius also apply to Effect of your Link Skill Buffs on your Mercenary"]={{[1]={flags=0,keywordFlags=0,name="LightRadiusAppliesToLinkEffect",type="FLAG",value=true}},nil}
 c["Increases and Reductions to Lightning Damage also apply to Effect of"]={nil,"Increases and Reductions to Lightning Damage also apply to Effect of "}
 c["Increases and Reductions to Lightning Damage also apply to Effect of Auras from Lightning Skills at 13% of their value, up to a maximum of 150%"]={{[1]={flags=0,keywordFlags=0,name="LightningDamageAppliesToLightningAuraEffect",type="FLAG",value=true},[2]={flags=0,keywordFlags=0,name="ImprovedLightningDamageAppliesToLightningAuraEffect",type="BASE",value=13},[3]={flags=0,keywordFlags=0,name="LightningDamageAppliesToLightningAuraEffectLimit",type="MAX",value=150}},nil}
 c["Increases and Reductions to Lightning Damage also apply to Effect of Auras from Lightning Skills at 15% of their value, up to a maximum of 150%"]={{[1]={flags=0,keywordFlags=0,name="LightningDamageAppliesToLightningAuraEffect",type="FLAG",value=true},[2]={flags=0,keywordFlags=0,name="ImprovedLightningDamageAppliesToLightningAuraEffect",type="BASE",value=15},[3]={flags=0,keywordFlags=0,name="LightningDamageAppliesToLightningAuraEffectLimit",type="MAX",value=150}},nil}
@@ -17440,8 +17439,7 @@ c["Link Skills have 20% increased Buff Effect if you have Linked to a target Rec
 c["Link Skills have 5% increased Buff Effect"]={{[1]={[1]={skillType=107,type="SkillType"},flags=0,keywordFlags=0,name="BuffEffect",type="INC",value=5}},nil}
 c["Link Skills have 50% increased range"]={{}," range "}
 c["Link Skills have 50% increased range Limited to 1 Runegraft of Connection"]={{}," range Limited to 1 Runegraft of Connection "}
-c["Link Skills have infinite Attachment Duration"]={nil,"infinite Attachment Duration "}
-c["Link Skills have infinite Attachment Duration If your Linked Mercenary dies, the Link owner does not also die"]={nil,"infinite Attachment Duration If your Linked Mercenary dies, the Link owner does not also die "}
+c["Link Skills have infinite Attachment Duration"]={{},nil}
 c["Linked Targets Cannot Die for 2 seconds after you Die"]={nil,"Linked Targets Cannot Die for 2 seconds after you Die "}
 c["Linked Targets Cannot Die for 2 seconds after you Die Lose no Experience when you die because a Linked target died"]={nil,"Linked Targets Cannot Die for 2 seconds after you Die Lose no Experience when you die because a Linked target died "}
 c["Linked Targets always count as in range of Non-Curse Auras from your Skills"]={{},nil}
@@ -20007,9 +20005,9 @@ c["Skills Socketed in your Boots are Supported by level 20 High-Impact Mine"]={{
 c["Skills Socketed in your Boots are Supported by level 20 Hypothermia"]={{[1]={[1]={slotName="Boots",type="SocketedIn"},flags=0,keywordFlags=0,name="ExtraSupport",type="LIST",value={appliesToGrantedSkills=true,level=20,skillId="SupportHypothermia"}}},nil}
 c["Skills Socketed in your Boots are Supported by level 20 Ice Bite"]={{[1]={[1]={slotName="Boots",type="SocketedIn"},flags=0,keywordFlags=0,name="ExtraSupport",type="LIST",value={appliesToGrantedSkills=true,level=20,skillId="SupportIceBite"}}},nil}
 c["Skills Socketed in your Boots are Supported by level 20 Ignite Proliferation"]={{[1]={[1]={slotName="Boots",type="SocketedIn"},flags=0,keywordFlags=0,name="ExtraSupport",type="LIST",value={appliesToGrantedSkills=true,level=20,skillId="SupportIgniteProliferation"}}},nil}
-end)();(function()
 c["Skills Socketed in your Boots are Supported by level 20 Immolate"]={{[1]={[1]={slotName="Boots",type="SocketedIn"},flags=0,keywordFlags=0,name="ExtraSupport",type="LIST",value={appliesToGrantedSkills=true,level=20,skillId="SupportImmolate"}}},nil}
 c["Skills Socketed in your Boots are Supported by level 20 Impale"]={{[1]={[1]={slotName="Boots",type="SocketedIn"},flags=0,keywordFlags=0,name="ExtraSupport",type="LIST",value={appliesToGrantedSkills=true,level=20,skillId="SupportImpale"}}},nil}
+end)();(function()
 c["Skills Socketed in your Boots are Supported by level 20 Increased Area of Effect"]={{[1]={[1]={slotName="Boots",type="SocketedIn"},flags=0,keywordFlags=0,name="ExtraSupport",type="LIST",value={appliesToGrantedSkills=true,level=20,skillId="SupportIncreasedAreaOfEffect"}}},nil}
 c["Skills Socketed in your Boots are Supported by level 20 Increased Critical Damage"]={{[1]={[1]={slotName="Boots",type="SocketedIn"},flags=0,keywordFlags=0,name="ExtraSupport",type="LIST",value={appliesToGrantedSkills=true,level=20,skillId="SupportIncreasedCriticalDamage"}}},nil}
 c["Skills Socketed in your Boots are Supported by level 20 Increased Critical Strikes"]={{[1]={[1]={slotName="Boots",type="SocketedIn"},flags=0,keywordFlags=0,name="ExtraSupport",type="LIST",value={appliesToGrantedSkills=true,level=20,skillId="SupportIncreasedCriticalStrikes"}}},nil}
@@ -22777,7 +22775,7 @@ c["You can have an Offering of each type"]={nil,"You can have an Offering of eac
 c["You can have an Offering of each type Offering Skills have 50% reduced Duration"]={nil,"You can have an Offering of each type Offering Skills have 50% reduced Duration "}
 c["You can have an additional Brand Attached to an Enemy"]={{[1]={flags=0,keywordFlags=0,name="BrandsAttachedLimit",type="BASE",value=1}},nil}
 c["You can have an additional Tincture active"]={{[1]={flags=0,keywordFlags=0,name="TinctureLimit",type="BASE",value=1}},nil}
-c["You can hire a Mercenary permanently"]={nil,"You can hire a Mercenary permanently "}
+c["You can hire a Mercenary permanently"]={{},nil}
 c["You can inflict +1 Hallowing Flame on Enemies"]={{[1]={flags=0,keywordFlags=0,name="Multiplier:HallowingFlameMax",type="BASE",value=1}},nil}
 c["You can inflict Bleeding on an Enemy up to 8 times"]={{[1]={flags=0,keywordFlags=0,name="BleedStacksMax",type="OVERRIDE",value=8},[2]={flags=0,keywordFlags=0,name="Condition:HaveCrimsonDance",type="FLAG",value=true}},nil}
 c["You can inflict an additional Ignite on each Enemy"]={{[1]={flags=0,keywordFlags=0,name="IgniteCanStack",type="FLAG",value=true},[2]={flags=0,keywordFlags=0,name="IgniteStacks",type="BASE",value=1}},nil}
@@ -23084,23 +23082,19 @@ c["Your Maximum Resistances are 77%"]={{[1]={flags=0,keywordFlags=0,name="FireRe
 c["Your Maximum Resistances are 78%"]={{[1]={flags=0,keywordFlags=0,name="FireResistMax",type="OVERRIDE",value=78},[2]={flags=0,keywordFlags=0,name="ColdResistMax",type="OVERRIDE",value=78},[3]={flags=0,keywordFlags=0,name="LightningResistMax",type="OVERRIDE",value=78},[4]={flags=0,keywordFlags=0,name="ChaosResistMax",type="OVERRIDE",value=78}},nil}
 c["Your Maximum Resistances are 80%"]={{[1]={flags=0,keywordFlags=0,name="FireResistMax",type="OVERRIDE",value=80},[2]={flags=0,keywordFlags=0,name="ColdResistMax",type="OVERRIDE",value=80},[3]={flags=0,keywordFlags=0,name="LightningResistMax",type="OVERRIDE",value=80},[4]={flags=0,keywordFlags=0,name="ChaosResistMax",type="OVERRIDE",value=80}},nil}
 c["Your Melee Hits can't be Evaded while wielding a Sword"]={{[1]={[1]={type="Condition",var="UsingSword"},flags=260,keywordFlags=0,name="CannotBeEvaded",type="FLAG",value=true}},nil}
-c["Your Mercenary Taunts on Hit"]={nil,"Your Mercenary Taunts on Hit "}
-c["Your Mercenary Taunts on Hit Your Mercenary has 50% increased effect of Non-Curse Auras from Skills"]={nil,"Your Mercenary Taunts on Hit Your Mercenary has 50% increased effect of Non-Curse Auras from Skills "}
-c["Your Mercenary and their Minions deal 15% increased Damage"]={nil,"Your Mercenary and their Minions deal 15% increased Damage "}
-c["Your Mercenary and their Minions deal 15% increased Damage 5% increased Light Radius"]={nil,"Your Mercenary and their Minions deal 15% increased Damage 5% increased Light Radius "}
+c["Your Mercenary Taunts on Hit"]={{},nil}
+c["Your Mercenary and their Minions deal 15% increased Damage"]={{},nil}
 c["Your Mercenary and their Minions deal 8% more Damage for"]={nil,"Your Mercenary and their Minions deal 8% more Damage for "}
-c["Your Mercenary and their Minions deal 8% more Damage for each Unique item they have equipped"]={nil,"Your Mercenary and their Minions deal 8% more Damage for each Unique item they have equipped "}
-c["Your Mercenary and their Minions have 15% increased maximum Life"]={nil,"Your Mercenary and their Minions have 15% increased maximum Life "}
-c["Your Mercenary and their Minions have 15% increased maximum Life 5% increased Light Radius"]={nil,"Your Mercenary and their Minions have 15% increased maximum Life 5% increased Light Radius "}
-c["Your Mercenary can equip Unique Amulets"]={nil,"Your Mercenary can equip Unique Amulets "}
-c["Your Mercenary can equip Unique Belts"]={nil,"Your Mercenary can equip Unique Belts "}
-c["Your Mercenary can equip Unique Boots"]={nil,"Your Mercenary can equip Unique Boots "}
-c["Your Mercenary can equip Unique Gloves"]={nil,"Your Mercenary can equip Unique Gloves "}
-c["Your Mercenary can equip Unique Helmets"]={nil,"Your Mercenary can equip Unique Helmets "}
-c["Your Mercenary can equip Unique Rings"]={nil,"Your Mercenary can equip Unique Rings "}
-c["Your Mercenary can equip Unique Weapons, Shields and Quivers"]={nil,"Your Mercenary can equip Unique Weapons, Shields and Quivers "}
-c["Your Mercenary can equip Unique Weapons, Shields and Quivers Your Mercenary and their Minions deal 8% more Damage for\neach Unique item they have equipped"]={nil,"Your Mercenary can equip Unique Weapons, Shields and Quivers Your Mercenary and their Minions deal 8% more Damage for\neach Unique item they have equipped "}
-c["Your Mercenary has 50% increased effect of Non-Curse Auras from Skills"]={nil,"Your Mercenary has 50% increased effect of Non-Curse Auras from Skills "}
+c["Your Mercenary and their Minions deal 8% more Damage for each Unique item they have equipped"]={{},nil}
+c["Your Mercenary and their Minions have 15% increased maximum Life"]={{},nil}
+c["Your Mercenary can equip Unique Amulets"]={{},nil}
+c["Your Mercenary can equip Unique Belts"]={{},nil}
+c["Your Mercenary can equip Unique Boots"]={{},nil}
+c["Your Mercenary can equip Unique Gloves"]={{},nil}
+c["Your Mercenary can equip Unique Helmets"]={{},nil}
+c["Your Mercenary can equip Unique Rings"]={{},nil}
+c["Your Mercenary can equip Unique Weapons, Shields and Quivers"]={{},nil}
+c["Your Mercenary has 50% increased effect of Non-Curse Auras from Skills"]={{},nil}
 c["Your Minions spread Burning Ground on Death, dealing 10% of their maximum Life as Fire Damage per second"]={{[1]={flags=0,keywordFlags=0,name="ExtraMinionSkill",type="LIST",value={skillId="ReplicaSiegebreakerBurningGround"}},[2]={flags=0,keywordFlags=0,name="MinionModifier",type="LIST",value={mod={flags=0,keywordFlags=0,name="Multiplier:SiegebreakerBurningGroundPercent",type="BASE",value=10}}}},nil}
 c["Your Minions spread Burning Ground on Death, dealing 20% of their maximum Life as Fire Damage per second"]={{[1]={flags=0,keywordFlags=0,name="ExtraMinionSkill",type="LIST",value={skillId="ReplicaSiegebreakerBurningGround"}},[2]={flags=0,keywordFlags=0,name="MinionModifier",type="LIST",value={mod={flags=0,keywordFlags=0,name="Multiplier:SiegebreakerBurningGroundPercent",type="BASE",value=20}}}},nil}
 c["Your Minions spread Caustic Ground on Death, dealing 20% of their maximum Life as Chaos Damage per second"]={{[1]={flags=0,keywordFlags=0,name="ExtraMinionSkill",type="LIST",value={skillId="SiegebreakerCausticGround"}},[2]={flags=0,keywordFlags=0,name="MinionModifier",type="LIST",value={mod={flags=0,keywordFlags=0,name="Multiplier:SiegebreakerCausticGroundPercent",type="BASE",value=20}}}},nil}
@@ -23171,7 +23165,6 @@ c["and nearby Allies Regenerate 400 Life per second"]={{[1]={[1]={type="Conditio
 c["be inflicted on a nearby Minion instead"]={nil,"be inflicted on a nearby Minion instead "}
 c["be inflicted on a nearby Minion instead Limited to 1 Runegraft of Loyalty"]={nil,"be inflicted on a nearby Minion instead Limited to 1 Runegraft of Loyalty "}
 c["each Herald affecting you, up to a maximum of 40%"]={nil,"each Herald affecting you, up to a maximum of 40% "}
-c["each Unique item they have equipped"]={nil,"each Unique item they have equipped "}
 c["each remaining Chain, up to a maximum of 100%"]={nil,"each remaining Chain, up to a maximum of 100% "}
 c["grant 100% increased Flask Charges"]={nil,"grant 100% increased Flask Charges "}
 c["has a 20% increased angle"]={nil,"has a 20% increased angle "}
@@ -23184,7 +23177,6 @@ c["have fewer than 5 Poisons on you"]={nil,"fewer than 5 Poisons on you "}
 c["more than once every 0.3 seconds"]={nil,"more than once every 0.3 seconds "}
 c["more than once every 0.3 seconds Lose all Defiance when you reach 10 Defiance"]={nil,"more than once every 0.3 seconds Lose all Defiance when you reach 10 Defiance "}
 c["more than once every 0.3 seconds Lose all Defiance when you reach 10 Defiance Gain 3% of Missing Unreserved Life before being Hit by an Enemy Per Defiance"]={nil,"more than once every 0.3 seconds Lose all Defiance when you reach 10 Defiance Gain 3% of Missing Unreserved Life before being Hit by an Enemy Per Defiance "}
-c["of your Link Skill Buffs on your Mercenary"]={nil,"of your Link Skill Buffs on your Mercenary "}
 c["of your Traps are Triggered by an Enemy"]={nil,"of your Traps are Triggered by an Enemy "}
 c["of your Traps are Triggered by an Enemy Skills which throw Traps Cost Life instead of Mana"]={nil,"of your Traps are Triggered by an Enemy Skills which throw Traps Cost Life instead of Mana "}
 c["per Tribe for which you have an allocated Tattoo"]={nil,"per Tribe for which you have an allocated Tattoo "}
@@ -23192,8 +23184,6 @@ c["per Tribe for which you have an allocated Tattoo Limited to 1 Ancestral Tatto
 c["removed by Filling Unreserved Life"]={nil,"removed by Filling Unreserved Life "}
 c["removed by Filling Unreserved Life 10% chance to gain Onslaught for 4 Seconds when Leech is"]={nil,"removed by Filling Unreserved Life 10% chance to gain Onslaught for 4 Seconds when Leech is "}
 c["second, up to a maximum of 100%"]={nil,"second, up to a maximum of 100% "}
-c["taken from your Mercenary's Life before you"]={nil,"taken from your Mercenary's Life before you "}
-c["taken from your Mercenary's Life before you If your Mercenary's Life is lower than your own, 40% of Damage they take is Recouped as Life"]={nil,"taken from your Mercenary's Life before you If your Mercenary's Life is lower than your own, 40% of Damage they take is Recouped as Life "}
 c["to grant an Endurance Charge when you Stun an Enemy"]={nil,"to grant an Endurance Charge when you Stun an Enemy "}
 c["to grant an Endurance Charge when you Stun an Enemy With at least 40 Strength in Radius, Ground Slam"]={nil,"to grant an Endurance Charge when you Stun an Enemy With at least 40 Strength in Radius, Ground Slam "}
 c["to grant an Endurance Charge when you Stun an Enemy With at least 40 Strength in Radius, Ground Slam has a 35% chance"]={nil,"to grant an Endurance Charge when you Stun an Enemy With at least 40 Strength in Radius, Ground Slam has a 35% chance "}

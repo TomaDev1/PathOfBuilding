@@ -2204,6 +2204,13 @@ function calcs.perform(env, skipEHP)
 	}
 	local linkSkills = { }
 	local allyBuffs = env.partyMembers["Aura"]
+	-- Luminary's Golden Glory: increases and reductions to Light Radius also apply to Link buff effect
+	if modDB:Flag(nil, "LightRadiusAppliesToLinkEffect") then
+		local lightRadiusInc = modDB:Sum("INC", nil, "LightRadius")
+		if lightRadiusInc ~= 0 then
+			modDB:NewMod("LinkEffect", "INC", lightRadiusInc, "Light Radius")
+		end
+	end
 	local buffExports = { Aura = {}, Curse = {}, Warcry = {}, Link = {}, EnemyMods = {}, EnemyConditions = {}, PlayerMods = {} }
 	local hasActiveSpectreSkill = false
 	local activeSpectreList = { }
