@@ -22,6 +22,7 @@ call after that is fast.
 | `edit_tree` | Allocate/deallocate nodes, choose mastery effects, change class/ascendancy/bloodline, import a tree URL, set level |
 | `get_items`, `equip_item`, `unequip_item` | Read items as text, equip pasted item text (in-game Ctrl+C format works), empty a slot |
 | `get_skills`, `set_skill_group`, `set_gem`, `remove_skill_group`, `set_main_skill` | Socket groups and gems, and which skill/part the DPS is for |
+| `spectres` | Spectre library and which spectres a Raise Spectre gem raises (by name); their auras and buffs count for you. `query` finds spectres and lists their buffs |
 | `get_config`, `set_config` | Configuration tab options (enemy type, charges, buffs...) and custom modifier lines |
 | `loadouts`, `compare_loadouts` | List, switch and create loadouts; calculate every loadout side by side |
 | `what_if` | Try several scenarios (any mix of the changes above) and get the deltas; the build is restored afterwards |

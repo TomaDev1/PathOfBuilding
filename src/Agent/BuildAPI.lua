@@ -485,6 +485,61 @@ local function equippedItems(includeText)
 	return res
 end
 
+-- Spectres: the build's spectre library (build.spectreList) and which spectre each Raise Spectre gem raises.
+-- PoB calculates one minion per gem, so a gem raising several spectres is modelled as one gem per spectre.
+local function spectreName(id)
+	local spectre = data.spectres[id]
+	return spectre and spectre.name or id
+end
+
+-- Match at the start of a word, so "Perfect" doesn't match "Imperfect"
+local function spectreNameMatches(name, wanted)
+	name = lower(name)
+	return name:sub(1, #wanted) == wanted or name:find(" "..wanted, 1, true) ~= nil
+end
+
+local function findSpectre(ref)
+	if data.spectres[ref] then
+		return ref
+	end
+	local wanted = lower(ref)
+	local partial = { }
+	for id, spectre in pairs(data.spectres) do
+		if lower(spectre.name) == wanted then
+			return id
+		elseif spectreNameMatches(spectre.name, wanted) then
+			t_insert(partial, id)
+		end
+	end
+	if #partial == 1 then
+		return partial[1]
+	end
+	if #partial == 0 then
+		error("No spectre named '"..tostring(ref).."'")
+	end
+	local names = { }
+	for _, id in ipairs(partial) do
+		t_insert(names, spectreName(id))
+	end
+	t_sort(names)
+	error("'"..tostring(ref).."' matches several spectres: "..t_concat(names, ", ", 1, m_min(#names, 12)))
+end
+
+local function isSpectreGem(gem)
+	local effect = gem.gemData and gem.gemData.grantedEffect
+	return effect and effect.id and effect.id:match("^RaiseSpectre") and true or false
+end
+
+local function baseSpectreCount(gem)
+	local effect = gem.gemData.grantedEffect
+	local levelData = effect.levels[gem.level] or effect.levels[#effect.levels]
+	for i, stat in ipairs(effect.stats or { }) do
+		if stat == "base_number_of_spectres_allowed" then
+			return levelData[i]
+		end
+	end
+end
+
 local function describeSocketGroup(group, index)
 	local res = {
 		index = index,
@@ -507,6 +562,7 @@ local function describeSocketGroup(group, index)
 			enabled = gem.enabled and true or false,
 			support = gemData and gemData.grantedEffect and gemData.grantedEffect.support or nil,
 			error = gem.errMsg and stripColors(gem.errMsg) or nil,
+			spectre = isSpectreGem(gem) and gem.skillMinion and spectreName(gem.skillMinion) or nil,
 		})
 	end
 	if group.displaySkillList and #group.displaySkillList > 0 then
@@ -979,6 +1035,87 @@ function Changes.main_skill(p)
 	return index
 end
 
+local function addToSpectreLibrary(id)
+	if not isValueInArray(build.spectreList, id) then
+		t_insert(build.spectreList, id)
+	end
+end
+
+function Changes.spectres(p)
+	for _, ref in ipairs(p.add or { }) do
+		addToSpectreLibrary(findSpectre(ref))
+	end
+	for _, ref in ipairs(p.remove or { }) do
+		local id = findSpectre(ref)
+		for i = #build.spectreList, 1, -1 do
+			if build.spectreList[i] == id then
+				table.remove(build.spectreList, i)
+			end
+		end
+	end
+	local res = { }
+	if p.active then
+		if not p.group then
+			error("active needs group: the socket group with the Raise Spectre gem")
+		end
+		local group = findSocketGroup(p.group)
+		local template, templateIndex
+		for i, gem in ipairs(group.gemList) do
+			if isSpectreGem(gem) then
+				template, templateIndex = gem, i
+				break
+			end
+		end
+		if not template then
+			error("Socket group '"..socketGroupLabel(group).."' has no Raise Spectre gem")
+		end
+		local ids = { }
+		for _, ref in ipairs(p.active) do
+			local id = findSpectre(ref)
+			addToSpectreLibrary(id)
+			t_insert(ids, id)
+		end
+		if #ids == 0 then
+			error("active needs at least one spectre")
+		end
+		-- Drop earlier per-spectre copies, keep the first Raise Spectre gem and its supports
+		for i = #group.gemList, templateIndex + 1, -1 do
+			if isSpectreGem(group.gemList[i]) then
+				table.remove(group.gemList, i)
+			end
+		end
+		template.skillMinion = ids[1]
+		template.skillMinionCalcs = ids[1]
+		for i = 2, #ids do
+			t_insert(group.gemList, templateIndex + i - 1, {
+				nameSpec = template.nameSpec,
+				gemId = template.gemId,
+				skillId = template.skillId,
+				level = template.level,
+				quality = template.quality,
+				qualityId = template.qualityId,
+				enabled = template.enabled,
+				enableGlobal1 = template.enableGlobal1,
+				enableGlobal2 = template.enableGlobal2,
+				count = template.count,
+				skillMinion = ids[i],
+				skillMinionCalcs = ids[i],
+			})
+		end
+		build.skillsTab:ProcessSocketGroup(group)
+		local base = baseSpectreCount(template)
+		if base and #ids > base then
+			res.warning = "A level "..template.level.." Raise Spectre raises "..base.." spectre(s) before other modifiers; "..#ids.." are active here"
+		end
+	end
+	build.buildFlag = true
+	res.library = { }
+	for _, id in ipairs(build.spectreList) do
+		t_insert(res.library, spectreName(id))
+	end
+	return res
+end
+
 local configVarList
 local function getConfigVarList()
 	if not configVarList then
@@ -1215,6 +1352,7 @@ local changeAliases = {
 	set_skill_group = "set_skill_group", add_skill_group = "set_skill_group", remove_skill_group = "remove_skill_group",
 	set_gem = "set_gem", main_skill = "main_skill", set_main_skill = "main_skill", config = "config", set_config = "config",
 	custom_mods = "custom_mods", add_mods = "custom_mods", loadout = "loadout", select_loadout = "loadout",
+	spectres = "spectres", set_spectres = "spectres",
 }
 function API.ApplyChange(change)
 	local kind = changeAliases[lower(change.type)]
@@ -1711,6 +1849,74 @@ tool{
 	end,
 }
 
+local function spectreBuffs(spectre)
+	local buffs = { }
+	for _, skillId in ipairs(spectre.skillList or { }) do
+		local skill = data.skills[skillId]
+		if skill and skill.skillTypes and (skill.skillTypes[SkillType.Aura] or skill.skillTypes[SkillType.Buff]) and skill.name then
+			t_insert(buffs, skill.name)
+		end
+	end
+	for _, mod in ipairs(spectre.modList or { }) do
+		if (mod.name == "AllyModifier" or mod.name == "PlayerModifier") and type(mod.value) == "table" and mod.value.mod then
+			t_insert(buffs, (mod.name == "AllyModifier" and "allies: " or "you: ")..mod.value.mod.name)
+		end
+	end
+	return buffs
+end
+
+tool{
+	name = "spectres",
+	description = "Manage spectres like PoB's spectre library and the minion dropdown of a Raise Spectre gem. With group + active, the first Raise Spectre gem in that group raises those spectres (one per name, e.g. ['Perfect Guardian Turtle', 'Perfect Pain Artist']); their auras and buffs then count for you. add/remove edit the library; query searches spectres by name and lists their buffs. With no changes, lists the library and which spectre each Raise Spectre gem raises.",
+	inputSchema = obj({
+		group = S.ref("Socket group (index or label) containing the Raise Spectre gem"),
+		active = S.arr({ type = "string" }, "Spectres this gem raises, by name or id; replaces the gem's current spectres"),
+		add = S.arr({ type = "string" }, "Spectres to add to the build's spectre library"),
+		remove = S.arr({ type = "string" }, "Spectres to remove from the library"),
+		query = S.str("Search spectre names (e.g. 'Perfect', 'Chieftain')"),
+	}),
+	handler = function(p)
+		requireBuild()
+		local res
+		if p.active or p.add or p.remove then
+			local before = currentHeadline()
+			res = afterChange(Changes.spectres(p), before)
+		else
+			res = { library = { } }
+			for _, id in ipairs(build.spectreList) do
+				local spectre = data.spectres[id]
+				t_insert(res.library, { name = spectreName(id), id = id, buffs = spectre and spectreBuffs(spectre) or nil })
+			end
+		end
+		res.raisedBy = { }
+		for i, group in ipairs(build.skillsTab.socketGroupList) do
+			local names = { }
+			for _, gem in ipairs(group.gemList) do
+				if isSpectreGem(gem) then
+					t_insert(names, gem.skillMinion and spectreName(gem.skillMinion) or "(first in library)")
+				end
+			end
+			if #names > 0 then
+				t_insert(res.raisedBy, { group = i, label = socketGroupLabel(group), enabled = group.enabled and true or false, spectres = names })
+			end
+		end
+		if p.query then
+			local wanted = lower(p.query)
+			res.matches = { }
+			for id, spectre in pairs(data.spectres) do
+				if spectreNameMatches(spectre.name, wanted) then
+					t_insert(res.matches, { name = spectre.name, id = id, buffs = spectreBuffs(spectre) })
+				end
+			end
+			t_sort(res.matches, function(a, b) return a.name < b.name end)
+			while #res.matches > 40 do
+				table.remove(res.matches)
+			end
+		end
+		return res
+	end,
+}
+
 tool{
 	name = "get_config",
 	description = "Show the Configuration tab: options that differ from default (enemy type, charges, buffs, conditions...) and custom modifiers. With all=true, list every option with its type and allowed values (filter with query).",
@@ -1855,7 +2061,7 @@ tool{
 
 local changeSchema = {
 	type = "object",
-	description = "A change: {type, ...params}. Types and params: allocate {nodes}, deallocate {nodes}, mastery {node, effect}, class {class}, ascendancy {ascendancy}, secondary_ascendancy {secondary_ascendancy}, tree_url {url}, level {level}, equip {item, slot?}, unequip {slot}, set_skill_group {group?, gems?, label?, slot?, enabled?, include_in_full_dps?, main?}, remove_skill_group {group}, set_gem {group, gem, name?, level?, quality?, enabled?}, main_skill {group, skill?, part?, stages?}, config {values}, custom_mods {mods}, loadout {name}.",
+	description = "A change: {type, ...params}. Types and params: allocate {nodes}, deallocate {nodes}, mastery {node, effect}, class {class}, ascendancy {ascendancy}, secondary_ascendancy {secondary_ascendancy}, tree_url {url}, level {level}, equip {item, slot?}, unequip {slot}, set_skill_group {group?, gems?, label?, slot?, enabled?, include_in_full_dps?, main?}, remove_skill_group {group}, set_gem {group, gem, name?, level?, quality?, enabled?}, main_skill {group, skill?, part?, stages?}, config {values}, custom_mods {mods}, loadout {name}, spectres {group?, active?, add?, remove?}.",
 	properties = { type = S.str("Change type") },
 	required = { "type" },
 }

@@ -288,6 +288,51 @@ describe("TestAgentAPI", function()
 		assert.is_true(field(after) >= 2)
 	end)
 
+	it("picks the spectres a Raise Spectre gem raises and applies their buffs", function()
+		call("new_build", { class = "Witch", level = 90 })
+		call("set_skill_group", { gems = { { name = "Raise Spectre", level = 20, quality = 20 }, "Minion Life" }, label = "Spectres" })
+		local base = call("get_stats").stats
+
+		local found = call("spectres", { query = "Perfect Guardian Turtle" })
+		assert.are.equals("Perfect Guardian Turtle", found.matches[1].name)
+
+		local res = call("spectres", { group = "Spectres", active = { "Perfect Guardian Turtle", "Perfect Primal Thunderbird" } })
+		assert.are.same({ "Perfect Guardian Turtle", "Perfect Primal Thunderbird" }, res.result.library)
+		assert.is_nil(res.result.warning)
+		assert.are.same({ "Perfect Guardian Turtle", "Perfect Primal Thunderbird" }, res.raisedBy[1].spectres)
+		local stats = call("get_stats").stats
+		assert.is_true(stats.armour > base.armour)
+		assert.is_true(stats.evasion > base.evasion)
+
+		-- Replacing the active list removes the old copies and keeps the supports
+		res = call("spectres", { group = "Spectres", active = { "Perfect Guardian Turtle" } })
+		assert.are.same({ "Perfect Guardian Turtle" }, res.raisedBy[1].spectres)
+		local skills = call("get_skills")
+		assert.are.equals(2, #skills.groups[1].gems)
+		assert.are.equals("Perfect Guardian Turtle", skills.groups[1].gems[1].spectre)
+		assert.are.equals(base.evasion, call("get_stats").stats.evasion)
+
+		-- Survives a save/load round trip
+		local code = call("save_build", { }).code
+		call("load_build", { code = code })
+		assert.are.same({ "Perfect Guardian Turtle" }, call("spectres", { }).raisedBy[1].spectres)
+
+		assert.has_error(function()
+			call("spectres", { group = "Spectres", active = { "No Such Spectre" } })
+		end)
+		res = call("spectres", { group = "Spectres", active = { "Carnage Chieftain", "Host Chieftain", "Perfect Warlord" } })
+		assert.is_truthy(res.result.warning)
+	end)
+
+	it("evaluates spectre choices in what-if scenarios", function()
+		call("new_build", { class = "Witch", level = 90 })
+		call("set_skill_group", { gems = { "Raise Spectre" }, label = "Spectres" })
+		local res = call("what_if", { scenarios = { { changes = { { type = "spectres", group = "Spectres", active = { "Perfect Guardian Turtle" } } } } } })
+		assert.is_nil(res.scenarios[1].error)
+		assert.is_true(res.scenarios[1].changes.armour.change > 0)
+		assert.are.equals(0, #build.spectreList)
+	end)
+
 	it("serves tools over MCP", function()
 		local out = { buf = { } }
 		function out:write(...)
