@@ -244,6 +244,50 @@ describe("TestAgentAPI", function()
 		assert.is_truthy(violationsFor("Skill group #1"):find("Legacy gem", 1, true))
 	end)
 
+	it("syncs a Luminary player's buffs into a Mercenary build", function()
+		-- A bare-bones Mercenary: attack skill and a curse, with a wand
+		call("new_build", { class = "Scion", ascendancy = "Luminary", level = 83 })
+		call("set_skill_group", { gems = { "Kinetic Blast" }, label = "KB", main = true })
+		call("set_skill_group", { gems = { "Elemental Weakness" }, label = "Curse" })
+		call("equip_item", { item = "Rarity: Rare\nTest Wand\nImbued Wand\nAdds 20 to 40 Physical Damage" })
+		call("equip_item", { item = "Rarity: Unique\nKaom's Heart\nGlorious Plate" })
+		call("set_config", { custom_mods = { "+20000 to maximum Life" } })
+		local mercPath = os.tmpname()
+		call("save_build", { path = mercPath })
+		local mercAlone = call("get_stats").stats
+
+		call("new_build", { class = "Scion", ascendancy = "Luminary", level = 95 })
+		call("edit_tree", { allocate = { "Golden Glory", "Loyal Bodyguard", "Legendary Arms" } })
+		call("set_skill_group", { gems = { "Flame Link" }, label = "Link", main = true })
+		local playerAlone = call("get_stats").stats
+
+		local res = call("merc_sync", { merc = mercPath })
+		os.remove(mercPath)
+		assert.are.equals("player", res.loaded)
+		assert.are.same({ "Flame Link" }, res.merc.buffsFromPlayer.Link)
+		assert.are.same({ "Elemental Weakness" }, res.player.buffsFromMerc.Curse)
+		assert.is_true(res.merc.stats.dps > mercAlone.dps)
+		-- 8% more damage per unique, and a unique body armour is never allowed
+		assert.is_truthy(table.concat(res.merc.luminaryMods, "\n"):find("8% more Damage", 1, true))
+		assert.are.equals(1, #res.merc.warnings)
+		assert.is_truthy(res.merc.warnings[1]:find("Body Armour", 1, true))
+		-- Loyal Bodyguard: 20% of hits are taken from the Mercenary's bigger Life pool
+		assert.is_true(res.player.after.minMaxHit > playerAlone.minMaxHit * 1.2)
+		assert.are.equals("Scion", call("get_summary").class)
+	end)
+
+	it("applies Light Radius to Link effect with Golden Glory", function()
+		call("new_build", { class = "Scion", ascendancy = "Luminary", level = 95 })
+		call("set_skill_group", { gems = { "Flame Link" }, label = "Link", main = true })
+		call("set_config", { custom_mods = { "100% increased Light Radius" } })
+		local before = call("get_stats", { fields = { "LinkEffectMod" } })
+		call("edit_tree", { allocate = { "Golden Glory" } })
+		local after = call("get_stats", { fields = { "LinkEffectMod" } })
+		local field = function(res) return (res.fields or res.raw).LinkEffectMod end
+		assert.are.equals(1, field(before))
+		assert.is_true(field(after) >= 2)
+	end)
+
 	it("serves tools over MCP", function()
 		local out = { buf = { } }
 		function out:write(...)

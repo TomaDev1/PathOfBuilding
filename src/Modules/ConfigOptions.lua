@@ -808,6 +808,9 @@ Huge sets the radius to 11.
 	{ var = "TotalSpectreLife", type = "integer", label = "Total Spectre Life override:", ifMod = "takenFromSpectresBeforeYou", ifSkill = "Raise Spectre", includeTransfigured = true, tooltip = "Overrides the automatically calculated total Life of your Spectres that can be taken before yours (used by Jinxed Juju).", apply = function(val, modList, enemyModList)
 		modList:NewMod("TotalSpectreLife", "OVERRIDE", val, "Config")
 	end },
+	{ var = "mercenaryLife", type = "integer", label = "Mercenary maximum Life:", ifMod = "takenFromMercenaryBeforeYou", tooltip = "Your Mercenary's maximum Life, used by Loyal Bodyguard. Damage is only taken from your Mercenary while its Life is higher than yours.", apply = function(val, modList, enemyModList)
+		modList:NewMod("TotalMercenaryLife", "BASE", val, "Config")
+	end },
 	{ var = "TotalTotemLife", type = "integer", label = "Nearest Totem Life override:", ifOption = "conditionHaveTotem", ifMod = "takenFromTotemsBeforeYou", tooltip = "Overrides the automatically calculated Life of your nearest Totem (excluding Vaal Rejuvenation Totem) that can be taken before yours (used by Totem Mastery).", apply = function(val, modList, enemyModList)
 		modList:NewMod("TotalTotemLife", "OVERRIDE", val, "Config")
 	end },
